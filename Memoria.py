@@ -2,22 +2,22 @@ import random
 import simpy 
 
 PROCESOS_INTERVALO = 10
-NEW_PROCESOS = 18
-RANDOM_SEED = 20
-INSTRUCTIONS_CPU = 1
+NEW_PROCESOS = 100
+RANDOM_SEED = 25
+INSTRUCTIONS_CPU = 3
 
 def proceso(env, name, COUNTER_CPU, instrucciones):
     global RAM
     starts = env.now
 
     MEMORY = random.uniform(0,10)
+    
     while MEMORY > RAM.level: 
         print("%7.4f %s: Memoria insuficiente" % (starts, name))
-        yield env.event()
         yield env.timeout(1)
     
     RAM.get(MEMORY)
-    print("%7.4f Starting process %s, Memory available: %d" % (starts, name, RAM.level))
+    print("%7.4f Starting %s, Memory available: %d" % (starts, name, RAM.level))
 
     while instrucciones > 0: 
         with COUNTER_CPU.request() as req:
@@ -29,16 +29,16 @@ def proceso(env, name, COUNTER_CPU, instrucciones):
             if instrucciones > 0:
                 WAITING = random.randint(1,2)
                 if WAITING == 1: 
-                    print ("%7.4f Proceso %s se va a poner en Waiting" % (starts, name))
+                    #print ("%7.4f Proceso %s se va a poner en Waiting" % (starts, name))
                     yield env.timeout(1)
-                    print ("%7.4f Proceso %s se va a ready" % (starts, name))
                 
                 elif WAITING == 2:  
-                    print ("%7.4f Proceso %s se va a ready" % (starts, name))
+                    #print ("%7.4f Proceso %s se va a ready" % (starts, name))
+                    a=1
                 
                     
             else: 
-                print ("%7.4f Proceso %s terminado" % (env.now, name))
+                #print ("%7.4f Proceso %s terminado" % (env.now, name))
                 RAM.put(MEMORY)
     
 
