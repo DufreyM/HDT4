@@ -1,15 +1,19 @@
 import random 
 import simpy 
+import numpy 
 
-PROCESOS_INTERVALO = 10
-NEW_PROCESOS = 100
-RANDOM_SEED = 25
+PROCESOS_INTERVALO = 1
+NEW_PROCESOS = 200
+RANDOM_SEED = 20
 INSTRUCTIONS_CPU = 3
+inicio = {}
+fin = {}
+
 
 def proceso(env, name, COUNTER_CPU, instrucciones):
     global RAM
     starts = env.now
-
+    inicio[name] =  starts
     MEMORY = random.uniform(0,10)
     
     while MEMORY > RAM.level: 
@@ -38,13 +42,14 @@ def proceso(env, name, COUNTER_CPU, instrucciones):
                 
                     
             else: 
-                #print ("%7.4f Proceso %s terminado" % (env.now, name))
+                print ("%7.4f Proceso %s terminado" % (env.now, name))
+                fin[name] = env.now
                 RAM.put(MEMORY)
     
 
 def procces(env, procesos, interval, counter): 
     for x in range(procesos): 
-        instrucciones = random.expovariate(1.0/ interval) 
+        instrucciones = random.uniform(1,10) 
         p = proceso(env, "Process%02d" % x, counter, instrucciones)
         env.process(p)
         t = random.expovariate(1.0/interval)
@@ -54,6 +59,13 @@ def procces(env, procesos, interval, counter):
 random.seed(RANDOM_SEED)
 env = simpy.Environment()
 RAM = simpy.Container(env, init=100, capacity=100)
-COUNTER_CPU = simpy.Resource(env, capacity=1)
+COUNTER_CPU = simpy.Resource(env, capacity=2)
 env.process(procces(env, NEW_PROCESOS, PROCESOS_INTERVALO, COUNTER_CPU))
 env.run()
+
+tiempos_procesamiento = [fin[name] - inicio[name] for name in inicio]
+tiempo_promedio = numpy.mean(tiempos_procesamiento)
+desviacion_estandar = numpy.std(tiempos_procesamiento)
+
+print("Tiempo promedio de procesamiento:", tiempo_promedio)
+print("Desviación estándar del tiempo de procesamiento:", desviacion_estandar)
